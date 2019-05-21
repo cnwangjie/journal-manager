@@ -29,5 +29,3 @@ app.use(journalRouter.routes())
 app.use(keywordRouter.routes())
 app.use(paperRouter.routes())
 app.use(subscriptionRouter.routes())
-
-require('../migrations/20190514')

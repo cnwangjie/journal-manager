@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "dev": "NODE_ENV=debug nodemon index",
+    "migrate": "NODE_ENV=migrate node index"
+  },
   "dependencies": {
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",

@@ -1,4 +1,5 @@
-const {Journal} = require('../src/models')
+const assert = require('assert')
+const {Journal, Inventory, Paper, Keyword} = require('../src/models')
 
 const journalsData = [
   ['自动化学报', '中国自动化学会', '11-1826/TP', '北京', '0254-4156', '2-180', '月刊'],
@@ -13,19 +14,52 @@ const paperData = `自动化学报 2017 43 1 平行学习—机器学习的一�
 计算机学报 2015 38 8 基于粒计算的大数据处理 徐计王国胤于洪 粒计算|大数据|云计算|深度学习 1497~1517
 计算机学报 2015 38 8 半监督学习 刘建伟刘媛罗雄麟 半监督学习|有类标签的样本|无类标签的样例|类标签|成对约束 1592~1617`.split('\n').map(i => i.split(' '))
 
+const inventoryData = `自动化学报,2017,43,1
+自动化学报,2017,43,2
+自动化学报,2017,40,3
+计算机学报,2017,40,1
+计算机学报,2017,31,2
+统计研究,2014,38,1
+计算机学报,2015,38,8`.split('\n').map(i => i.split(','))
+
 const main = async () => {
+  console.log('migrating...')
   const initJournals = journalsData.map(async ([name, sponsor, cn, location, issn, code, period]) => {
-    const exists = await Journal.findOne({cn})
-    if (exists) return
-    return new Journal({
-      name, sponsor, cn, location, issn, code, period,
-    }).save()
+    return await Journal.findOne({cn})
+      || await Journal.create({name, sponsor, cn, location, issn, code, period})
   })
   await Promise.all(initJournals)
   console.log('init journals done')
-  const initPapers = paperData.map(async ([journal_name, year, phase, season, title, author, keywords, page]) => {
 
+  const initInventory = inventoryData.map(async ([journal_name, year, phase, season]) => {
+    const journal = await Journal.findOne({name: journal_name})
+    assert.notEqual(journal, null, `journal ${journal_name} not exists`)
+
+    return await Inventory.findOne({journal_id: journal._id, year, season})
+      || await Inventory.create({journal_id: journal._id, year, season})
   })
+  await Promise.all(initInventory)
+  console.log('init inventory done')
+
+  const initPapers = paperData.map(async ([journal_name, year, phase, season, title, author, keywords, page]) => {
+    const exists = await Paper.findOne({title})
+    if (exists) return
+
+    const journal = await Journal.findOne({name: journal_name})
+    assert.notEqual(journal, null, `journal ${journal_name} not exists`)
+
+    const inventory = await Inventory.findOne({journal_id: journal._id, year, season})
+    assert.notEqual(journal, null, `inventory ${journal_name} ${year} ${season} not exists`)
+
+    const initKeywords = keywords.split('|').map(async keyword => {
+      return await Keyword.findOne({name: keyword}) || Keyword.create({name: keyword})
+    })
+    const keywordIds = (await Promise.all(initKeywords)).map(({_id}) => _id)
+
+    return await Paper.create({inventory_id: inventory._id, title, author, page, keywords: keywordIds})
+  })
+  await Promise.all(initPapers)
+  console.log('init paper done')
 }
 
-main()
+module.exports = main
