@@ -1,23 +1,9 @@
 const Router = require('koa-router')
 
-const router = module.exports = new Router({ prefix: '/inventory' })
+const {Keyword} = require('../models')
 
-router.get('/', ctx => {
+const router = module.exports = new Router({ prefix: '/keyword' })
 
-})
-
-router.put('/:id', ctx => {
-
-})
-
-router.delete('/:id', ctx => {
-
-})
-
-router.put('/:id/borrow', ctx => {
-
-})
-
-router.put('/:id/return', ctx => {
-
+router.get('/', async ctx => {
+  ctx.body = await Keyword.find()
 })

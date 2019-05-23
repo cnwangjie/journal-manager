@@ -3,6 +3,7 @@ const path = require('path')
 const Koa = require('koa')
 const render = require('koa-ejs')
 const mongoose = require('mongoose')
+const bodyParser = require('koa-bodyparser')
 
 const inventoryRouter = require('./router/inventory')
 const journalRouter = require('./router/journal')
@@ -15,6 +16,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/jm', {
 })
 
 const app = module.exports = new Koa()
+
+app.use(bodyParser())
 
 render(app, {
   root: path.join(__dirname, 'view'),
