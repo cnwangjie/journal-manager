@@ -19,6 +19,14 @@ const app = module.exports = new Koa()
 
 app.use(bodyParser())
 
+app.use(async (ctx, next) => {
+  ctx.set('Access-Control-Allow-Origin', '*')
+  ctx.set('Access-Control-Allow-Headers', '*')
+  ctx.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS')
+  if (ctx.method === 'OPTIONS') ctx.status = 200
+  else await next()
+})
+
 render(app, {
   root: path.join(__dirname, 'view'),
   layout: 'template',
