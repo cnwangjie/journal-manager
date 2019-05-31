@@ -19,7 +19,7 @@ router.delete('/:_id', async ctx => {
 router.put('/:_id/borrow', async ctx => {
   const {_id} = ctx.params
   const {borrower_id} = ctx.request.body
-  ctx.body = await Inventory.findByIdAndUpdate(_id, {borrower_id}, {new: true})
+  ctx.body = await Inventory.findByIdAndUpdate(_id, {borrower_id}, {new: true, useFindAndModify: false})
 })
 
 router.put('/:_id/return', async ctx => {

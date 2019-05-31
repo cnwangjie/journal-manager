@@ -5,7 +5,7 @@ const {Paper, Keyword} = require('../models')
 const router = module.exports = new Router({ prefix: '/paper' })
 
 router.get('/', async ctx => {
-  const {inventory_id, title, author, keyword} = ctx.params
+  const {inventory_id, phase, title, author, keyword} = ctx.params
   if (inventory_id) return ctx.body = await Paper.find({inventory_id})
   if (title) return ctx.body = await Paper.findOne({title})
   if (author) return ctx.body = await Paper.find({author: new RegExp(author)})
@@ -24,6 +24,11 @@ router.put('/', async ctx => {
 })
 
 router.get('/:_id', async ctx => {
+  const {_id} = ctx.params
+  ctx.body = await Paper.findById(_id)
+})
+
+router.delete('/:_id', async ctx => {
   const {_id} = ctx.params
   ctx.body = await Paper.findByIdAndDelete(_id)
 })

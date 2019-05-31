@@ -10,6 +10,7 @@ const journalRouter = require('./router/journal')
 const keywordRouter = require('./router/keyword')
 const paperRouter = require('./router/paper')
 const subscriptionRouter = require('./router/subscription')
+const userRouter = require('./router/user')
 
 mongoose.connect('mongodb://127.0.0.1:27017/jm', {
   useNewUrlParser: true,
@@ -40,3 +41,4 @@ app.use(journalRouter.routes())
 app.use(keywordRouter.routes())
 app.use(paperRouter.routes())
 app.use(subscriptionRouter.routes())
+app.use(userRouter.routes())

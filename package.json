@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "NODE_ENV=debug nodemon index",
-    "migrate": "NODE_ENV=migrate node index"
+    "migrate": "NODE_ENV=migrate node index",
+    "test": "NODE_ENV=test mocha --exit tests/**/*"
   },
   "dependencies": {
     "koa": "^2.7.0",
@@ -9,5 +10,10 @@
     "koa-ejs": "^4.2.0",
     "koa-router": "^7.4.0",
     "mongoose": "^5.5.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "supertest": "^4.0.2"
   }
 }

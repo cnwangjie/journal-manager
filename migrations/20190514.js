@@ -1,5 +1,5 @@
 const assert = require('assert')
-const {Journal, Inventory, Paper, Keyword, Subscription} = require('../src/models')
+const {Journal, Inventory, Paper, Keyword, Subscription, User} = require('../src/models')
 
 const journalsData = [
   ['自动化学报', '中国自动化学会', '11-1826/TP', '北京', '0254-4156', '2-180', '月刊'],
@@ -14,13 +14,13 @@ const paperData = `自动化学报 2017 43 1 平行学习—机器学习的一�
 计算机学报 2015 38 8 基于粒计算的大数据处理 徐计,王国胤,于洪 粒计算|大数据|云计算|深度学习 1497~1517
 计算机学报 2015 38 8 半监督学习 刘建伟,刘媛,罗雄麟 半监督学习|有类标签的样本|无类标签的样例|类标签|成对约束 1592~1617`.split('\n').map(i => i.split(' '))
 
-const inventoryData = `自动化学报,2017,43,1
+const inventoryData = `自动化学报,2017,43,1,章三
 自动化学报,2017,43,2
 自动化学报,2017,40,3
 计算机学报,2017,40,1
 计算机学报,2017,31,2
-统计研究,2014,38,1
-计算机学报,2015,38,8`.split('\n').map(i => i.split(','))
+统计研究,2014,38,1,汪五
+计算机学报,2015,38,8,里四`.split('\n').map(i => i.split(','))
 
 const subscriptionData = `2-180,2018
 82-14,2018
@@ -35,16 +35,21 @@ const subscriptionData = `2-180,2018
 const main = async () => {
   console.log('migrating...')
   const initJournals = journalsData.map(async ([name, sponsor, cn, location, issn, code, period]) => {
-    return await Journal.findOneAndUpdate({name, cn}, {name, sponsor, cn, location, issn, code, period}, {upsert: true})
+    return await Journal.findOneAndUpdate({name, cn}, {name, sponsor, cn, location, issn, code, period}, {upsert: true, useFindAndModify: false})
   })
   await Promise.all(initJournals)
   console.log('init journals done')
 
-  const initInventory = inventoryData.map(async ([journal_name, year, phase, season]) => {
+  const initInventory = inventoryData.map(async ([journal_name, year, phase, season, borrower]) => {
     const journal = await Journal.findOne({name: journal_name})
     assert.notEqual(journal, null, `journal ${journal_name} not exists`)
-
-    return await Inventory.findOneAndUpdate({journal_id: journal._id, year, phase, season}, {journal_id: journal._id, year, phase, season}, {upsert: true})
+    let borrower_id
+    if (borrower) {
+      const user = await User.findOneAndUpdate({name: borrower}, {name: borrower}, {new: true, upsert: true, useFindAndModify: false})
+      borrower_id = user._id
+    }
+    
+    return await Inventory.findOneAndUpdate({journal_id: journal._id, year, phase, season}, {journal_id: journal._id, year, phase, season, borrower_id}, {upsert: true, useFindAndModify: false})
   })
   await Promise.all(initInventory)
   console.log('init inventory done')
@@ -60,7 +65,7 @@ const main = async () => {
     assert.notEqual(journal, null, `inventory ${journal_name} ${year} ${season} not exists`)
 
     const initKeywords = keywords.split('|').map(async keyword => {
-      return await Keyword.findOneAndUpdate({name: keyword}, {name: keyword}, {upsert: true})
+      return Keyword.findOneAndUpdate({name: keyword}, {name: keyword}, {upsert: true, useFindAndModify: false})
     })
     const keywordIds = (await Promise.all(initKeywords)).map(({_id}) => _id)
 
@@ -73,7 +78,7 @@ const main = async () => {
     const journal = await Journal.findOne({code})
     assert.notEqual(journal, null, `journal with code: ${code} not exists`)
 
-    return await Subscription.findOneAndUpdate({journal_id: journal._id, year}, {journal_id: journal._id, year}, {upsert: true})
+    return await Subscription.findOneAndUpdate({journal_id: journal._id, year}, {journal_id: journal._id, year}, {upsert: true, useFindAndModify: false})
   })
   await Promise.all(initSubscriptions)
   console.log('init subscription done')

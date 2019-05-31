@@ -11,6 +11,11 @@ router.get('/', async ctx => {
   ctx.body = await Journal.find()
 })
 
+router.get('/:_id', async ctx => {
+  const {_id} = ctx.params
+  ctx.body = await Journal.findOne({_id})
+})
+
 router.put('/', async ctx => {
   const {name, sponsor, cn, location, issn, code, period} = ctx.request.body
   const journal = await Journal.findOneAndUpdate({cn}, {name, sponsor, cn, location, issn, code, period}, {new: true, upsert: true})
