@@ -65,7 +65,7 @@ const main = async () => {
     assert.notEqual(journal, null, `inventory ${journal_name} ${year} ${season} not exists`)
 
     const initKeywords = keywords.split('|').map(async keyword => {
-      return Keyword.findOneAndUpdate({name: keyword}, {name: keyword}, {upsert: true, useFindAndModify: false})
+      return await Keyword.findOneAndUpdate({name: keyword}, {name: keyword}, {upsert: true, useFindAndModify: false})
     })
     const keywordIds = (await Promise.all(initKeywords)).map(({_id}) => _id)
 
