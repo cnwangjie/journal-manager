@@ -12,7 +12,9 @@ const paperRouter = require('./router/paper')
 const subscriptionRouter = require('./router/subscription')
 const userRouter = require('./router/user')
 
-mongoose.connect('mongodb://127.0.0.1:27017/jm', {
+const MONGODB = process.env.MONGODB || 'mongodb://127.0.0.1:27017/jm'
+
+mongoose.connect(MONGODB, {
   useNewUrlParser: true,
 })
 
