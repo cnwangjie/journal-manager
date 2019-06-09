@@ -19,8 +19,11 @@ router.get('/', async ctx => {
 
 router.put('/', async ctx => {
   const {inventory_id, title, author, page, keywords} = ctx.request.body
-  const kws = await Keyword.UpdateMany({name: {$in: keywords}}, {upsert: true})
-  ctx.body = await Paper.findOneAndUpdate({inventory_id, title}, {inventory_id, title, author, page, keywords: kws.map(({_id}) => _id)})
+  const kws = await Promise.all(keywords.map(async keyword => {
+    return await Keyword.findOneAndUpdate({name: keyword}, {name: keyword}, {upsert: true, useFindAndModify: false})
+  }))
+  const paper = await Paper.findOneAndUpdate({inventory_id, title}, {inventory_id, title, author, page, keywords: kws.map(({_id}) => _id)}, {new: true, upsert: true, useFindAndModify: false})
+  ctx.body = paper
 })
 
 router.get('/:_id', async ctx => {

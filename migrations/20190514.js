@@ -48,7 +48,7 @@ const main = async () => {
       const user = await User.findOneAndUpdate({name: borrower}, {name: borrower}, {new: true, upsert: true, useFindAndModify: false})
       borrower_id = user._id
     }
-    
+
     return await Inventory.findOneAndUpdate({journal_id: journal._id, year, phase, season}, {journal_id: journal._id, year, phase, season, borrower_id}, {upsert: true, useFindAndModify: false})
   })
   await Promise.all(initInventory)
